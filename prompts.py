@@ -32,7 +32,7 @@ supervisor_Prompt = ChatPromptTemplate.from_messages(
         Do not include markdown, explanations, or code fences.
 
         Extract the following fields when available:
-
+        is_football_query
         team_name
         opponent
         need_opponent
@@ -44,7 +44,7 @@ supervisor_Prompt = ChatPromptTemplate.from_messages(
         agents
 
         Definitions:
-
+        is_football_query: If user's query is not related to Football, simply set False value otherwise True.
         team_name: Main team mentioned in the query.
         opponent: Opposing team if explicitly mentioned.
         need_opponent: True or False, if opponent needed or not based on query
@@ -78,8 +78,35 @@ supervisor_Prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-# matchup_Prompt = ChatPromptTemplate.from_messages([
-#     (
+matchup_Prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system","""
+            You are a Matchup AI agent of a football multi agent system. You will behave like an experienced analyst who provide the detailed info to another AI agent.
 
-#     )
-# ])
+            Your responsibility is to understand user's query delimited by angle brackets, and the provided raw context data in dictionary form. 
+
+            You will provide the detailed analysed information like an AI Agent to another AI Agent.
+
+            The context contains multiple dictionaries:
+            next_match: Dictionary of next match details.
+            previous_match: Dictionary of previous played matches of team with other teams. It can be multiple.
+            head_to_head: Dictionary of previous played matches between team and opponent team specifically.
+
+            Instructions:
+            Do not invent or provide any information from your training that is not present in the query or context.
+            Return only in bullet points with - symbol.
+            Mention UTC TimeZone with time.
+            Some objects can be repeat or duplicate in the provided context, Understand them deeply and dont mention them more then once.
+            If head to head match details of team and opponent team is not available, mention "There are no previous head-to-head matches between team and opponent team".
+            You have to mention that this detailed briefing is from the Matchup-Agent. It your identity.
+
+            User Query:
+            <{user_query}>
+
+            Context:
+            {context}
+            """
+        )
+    ]
+)
