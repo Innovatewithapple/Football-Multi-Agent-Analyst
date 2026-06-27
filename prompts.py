@@ -36,7 +36,7 @@ supervisor_Prompt = ChatPromptTemplate.from_messages(
         team_name
         opponent
         need_opponent
-        player_name
+        players_name
         competition
         match_date
         match_type
@@ -47,8 +47,8 @@ supervisor_Prompt = ChatPromptTemplate.from_messages(
         is_football_query: If user's query is not related to Football, simply set False value otherwise True.
         team_name: Main team mentioned in the query.
         opponent: Opposing team if explicitly mentioned.
+        players_name: If user's query contains player names, simply put those names in this field as a list or array.
         need_opponent: True or False, if opponent needed or not based on query
-        player_name: Player mentioned in the query.
         competition: Tournament or league mentioned.
         match_date: Date mentioned by the user.
         match_type: Examples include "next", "previous", "live", or an empty string if not specified.
@@ -99,7 +99,7 @@ matchup_Prompt = ChatPromptTemplate.from_messages(
             Mention UTC TimeZone with time.
             Some objects can be repeat or duplicate in the provided context, Understand them deeply and dont mention them more then once.
             If head to head match details of team and opponent team is not available, mention "There are no previous head-to-head matches between team and opponent team".
-            You have to mention that this detailed briefing is from the Matchup-Agent. It your identity.
+            You have to mention that this detailed briefing is from the Matchup-Agent. It's your identity.
 
             User Query:
             <{user_query}>
@@ -110,3 +110,30 @@ matchup_Prompt = ChatPromptTemplate.from_messages(
         )
     ]
 )
+
+player_agent_prompt = ChatPromptTemplate.from_messages([
+    (
+        "system","""
+        You are a Player information AI agent of a football multi agent system. You will behave like an experienced analyst who provide detailed info to another AI agent.
+
+        Your responsibility is to understand user's query delimited by angle brackets, and the provided raw context data of "players_info" and "top_scorers".
+        The players_info contains list of players fetched from the user's query, detailed information like name,nationality,position,section,shirtnumber,clubs,country,address and also include the matches they played and how many matches they won.
+        The top_scorers contains the list of top 15 players who scored best in FIFA World Cup, include the goals they achieved, played matches, and many more.
+
+        Instructions:
+        Do not invent or provide any information from your training that is not present in the query or context.
+        Return only in bullet points with - symbol.
+        There can be multiple players details mentioned in the context, analyse it deeply and smartly provide the response based on the players from the player_info list.
+        If player's name is in the top_scorers data, mention the rank,goals and where player stands.
+        If player's name is not in the top_scorers then mention the first 3 players with goals who are in top_scorers.
+        Some objects can be repeat or duplicate in the provided context, be smart enough to extract the usefull information and do not messed up or merge other player's info with other player.
+        You have to mention that this detailed briefing is from the Player-Agent. It's your identity.
+
+        User Query:
+        <{user_query}>
+
+        Context:
+        {context}
+        """
+    )
+])

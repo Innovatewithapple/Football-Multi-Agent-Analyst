@@ -11,6 +11,15 @@ def get_team_by_name(name:str):
         None
     )
 
+def get_playerinfo_from_json_by_name(name:str):
+    with open('teams.json','r') as file:
+        teams = json.load(file)['teams']
+        for i in teams:
+            for player in i['squad']:
+                if name.lower() in player["name"].lower():
+                    return player
+
+
 class SupervisorOutput(BaseModel):
     is_football_query: bool
     reason: str
@@ -18,7 +27,7 @@ class SupervisorOutput(BaseModel):
     team_name: str
     opponent: str
     need_opponent: bool
-    player_name: str
+    players_name: list[str]
     competition: str
     match_date: str
     match_type: str
@@ -30,13 +39,17 @@ class MatchupState(TypedDict):
     previous_match:dict
     head_to_head:dict
 
+class PlayerState(TypedDict):
+    players_info:list
+    top_scorers:list
+
 class GraphState(TypedDict):
     question: str
     finalAnswer:str
     team_name: str
     opponent: str
     need_opponent: bool
-    player_name: str
+    players_name: str
     competition: str
     match_date: str
     match_type: str
@@ -44,12 +57,15 @@ class GraphState(TypedDict):
 
     agents: list[str]
 
-    match_analysis: str
+    player_state: PlayerState
+    player_agent_response:str
     player_analysis: str
+
     news_analysis: str
 
     matchup_state: MatchupState
-
     matchup_agent_response:str
+    match_analysis: str
+
 
     final_answer: str

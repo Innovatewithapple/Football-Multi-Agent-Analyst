@@ -59,3 +59,16 @@ class FootballResponseParser:
             })
 
         return match_data    
+
+    @staticmethod
+    def _extract_top_scorers(scorers:list,player_ids:list):
+        selected_scorers=[]
+        if not player_ids:
+            return scorers
+        else:
+            for scorer in scorers:
+                for player in player_ids:
+                    if scorer['player']['id'] == player:
+                        selected_scorers.append(scorer)
+                        break
+            return selected_scorers

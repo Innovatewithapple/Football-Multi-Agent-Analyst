@@ -1,7 +1,9 @@
+from turtle import st
+
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_core.output_parsers import StrOutputParser
-from prompts import supervisor_Prompt,matchup_Prompt
-from handlers import GraphState, SupervisorOutput, get_team_by_name
+from prompts import supervisor_Prompt,matchup_Prompt,player_agent_prompt
+from Modelhandlers import GraphState, SupervisorOutput, get_team_by_name,get_playerinfo_from_json_by_name
 from dotenv import load_dotenv
 import os
 from footbal_service import FootballService
@@ -36,7 +38,7 @@ def supervised_Node(state: GraphState):
             "team_name": result.team_name,
             "opponent": result.opponent,
             "need_opponent": result.need_opponent,
-            "player_name": result.player_name,
+            "players_name": result.players_name,
             "competition": result.competition,
             "match_type": result.match_type,
             "intent": result.intent,
@@ -76,3 +78,46 @@ def matchup_agent_Node(state: GraphState):
     return {
         "matchup_agent_response":result
     }
+
+def player_context_Node(state:GraphState):
+    selected_player_ids=[]
+    fetched_player_info_list=[]
+    for player in state['players_name']:
+     player = get_playerinfo_from_json_by_name(name=player)
+     selected_player_ids.append(player['id'])
+
+    fetched_scorer_data = football_service.get_tournament_Top_scores_player(player_ids=selected_player_ids) #this incude top ones too, if there are no specific names in search
+   
+    for i in selected_player_ids:
+     fetched_player_info = football_service.get_player_info(player_id=i)
+     fetched_player_info['matches'] = football_service.get_player_matches_info(player_id=i)
+     fetched_player_info_list.append(fetched_player_info)
+    # print(f'\n\n =====PlayerIDS: {selected_player_ids}')
+    # print(f'\n\n fetched_player_info_list: {fetched_player_info_list}')
+    # print(f'\n\n fetched_scorer_data: {fetched_player_info_list}')
+    return {
+       "player_state":{
+          "players_info":fetched_player_info_list,
+          "top_scorers":fetched_scorer_data
+       }
+    }
+  
+def player_agent_Node(state:GraphState):
+   player_chain=(
+      player_agent_prompt
+      | chat_Model
+      | parser
+   )
+
+   result = player_chain.invoke({
+      "user_query":state['question'],
+      "context":state['player_state']
+   })
+#    print(f'\n\nfinal_result: {result}')
+   return {
+      "player_agent_response":result
+   }
+
+    
+
+
