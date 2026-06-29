@@ -18,6 +18,14 @@ def get_playerinfo_from_json_by_name(name:str):
             for player in i['squad']:
                 if name.lower() in player["name"].lower():
                     return player
+                
+def get_team_by_playername(name:str):
+    with open('teams.json','r') as file:
+        teams = json.load(file)['teams']
+        for i in teams:
+            for player in i['squad']:
+                if name.lower() in player["name"].lower():
+                    return i
 
 
 class SupervisorOutput(BaseModel):
@@ -26,6 +34,7 @@ class SupervisorOutput(BaseModel):
 
     team_name: str
     opponent: str
+    topics:list[str]
     need_opponent: bool
     players_name: list[str]
     competition: str
@@ -35,13 +44,17 @@ class SupervisorOutput(BaseModel):
     agents: list[str]
     
 class MatchupState(TypedDict):
-    next_match:dict
-    previous_match:dict
-    head_to_head:dict
+    team: str
+    next_match: dict
+    previous_match: dict
+    head_to_head: dict
 
 class PlayerState(TypedDict):
     players_info:list
     top_scorers:list
+
+class NewsState(TypedDict):
+    news_articles:list
 
 class GraphState(TypedDict):
     question: str
@@ -54,18 +67,19 @@ class GraphState(TypedDict):
     match_date: str
     match_type: str
     intent: str
-
+    topics:list[str]
     agents: list[str]
 
     player_state: PlayerState
     player_agent_response:str
     player_analysis: str
 
+    news_state:NewsState
+    news_agent_response:str
     news_analysis: str
 
-    matchup_state: MatchupState
+    matchup_state: list[MatchupState]
     matchup_agent_response:str
     match_analysis: str
-
 
     final_answer: str

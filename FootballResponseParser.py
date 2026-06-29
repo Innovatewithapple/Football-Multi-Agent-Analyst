@@ -72,3 +72,20 @@ class FootballResponseParser:
                         selected_scorers.append(scorer)
                         break
             return selected_scorers
+    
+    @staticmethod
+    def _extract_top_news_by_query(newsDict:list):
+        top_five_news_articles_arr=[]
+        for news in newsDict[:5]:
+            top_five_news_articles = {
+                "author":news['author'],
+                "title":news['title'],
+                "description":news['description'],
+                "publishedAt":news['publishedAt'],
+                "content":news['content'],
+                "url":news['url'],
+                "source_name":news['source']['name']
+            }
+            top_five_news_articles_arr.append(top_five_news_articles)
+
+        return top_five_news_articles_arr
