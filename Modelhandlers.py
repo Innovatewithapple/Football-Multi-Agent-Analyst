@@ -69,7 +69,7 @@ class GraphState(TypedDict):
     intent: str
     topics:list[str]
     agents: list[str]
-
+    is_football_query:bool
     player_state: PlayerState
     player_agent_response:str
     player_analysis: str

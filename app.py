@@ -2,7 +2,7 @@ import json
 import asyncio
 from langgraph.graph import StateGraph, START, END
 from Modelhandlers import GraphState
-from ApiRequests import player_context_Node, supervised_Node,matchup_context_Node,matchup_agent_Node,player_context_Node,player_agent_Node,news_context_node,news_agent_Node,final_agent_node,route_agents
+from ApiRequests import fallback_agent,player_context_Node, supervised_Node,matchup_context_Node,matchup_agent_Node,player_context_Node,player_agent_Node,news_context_node,news_agent_Node,final_agent_node,route_agents
 from footbal_service import FootballService
 from news_service import News_service
 import time
@@ -24,6 +24,7 @@ builder.add_node("playerAgent",player_agent_Node)
 builder.add_node("newsContext",news_context_node)
 builder.add_node("newsAgent",news_agent_Node)
 
+builder.add_node("fallbackAgent",fallback_agent)
 builder.add_node("finalAgent",final_agent_node)
 
 builder.add_edge(START,"supervised")
@@ -39,6 +40,7 @@ builder.add_edge("newsContext","newsAgent")
 builder.add_edge("matchupAgent", "finalAgent")
 builder.add_edge("playerAgent", "finalAgent")
 builder.add_edge("newsAgent", "finalAgent")
+builder.add_edge("fallbackAgent", END)
 
 #----Conditional Edge------!
 builder.add_conditional_edges(
@@ -46,7 +48,8 @@ builder.add_conditional_edges(
    {
       "Matchup-Agent":"matchupContext",
       "Player-Agent":"playerContext",
-      "News-Agent":"newsContext"
+      "News-Agent":"newsContext",
+      "Fallback-Agent":"fallbackAgent"
    }
 )
 
@@ -55,13 +58,9 @@ builder.add_edge("finalAgent",END)
 graph = builder.compile()
 
 async def main():
-   png = graph.get_graph().draw_mermaid_png()
-
-   with open("graph.png", "wb") as f:
-    f.write(png)
-
-   print("Graph saved!")
-   query = "Who is Cristiano Ronaldo?"
+   query = """
+    "question": "Who is Kylian Mbappe?"
+"""
    answer = await graph.ainvoke({"question":query})
    print(f'\n\n Query: {query}')
    print(f'\n Answer: \n{answer["final_answer"]}')

@@ -1,4 +1,3 @@
-from turtle import st
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from langchain_core.output_parsers import StrOutputParser
 from prompts import supervisor_Prompt,matchup_Prompt,player_agent_prompt,news_agent_prompt,final_agent_prompt
@@ -41,6 +40,8 @@ async def supervised_Node(state: GraphState):
          print(f"\n\nResult: {result.model_dump()}")
          if not result.is_football_query:
             return {
+                  "is_football_query": False,
+                  "agents": ["Fallback-Agent"],
                   "finalAnswer":"This is Football Analyser Agent! Please search Football related question."
             }
          else:
@@ -147,8 +148,10 @@ async def player_context_Node(state:GraphState):
          selected_player_ids=[]
          fetched_player_info_list=[]
          for player in state['players_name']:
-            player = get_playerinfo_from_json_by_name(name=player)
-            selected_player_ids.append(player['id'])
+            playerinfo = get_playerinfo_from_json_by_name(name=player)
+            if playerinfo is None:
+                continue
+            selected_player_ids.append(playerinfo['id'])
 
          fetched_scorer_data = await football_service.get_tournament_Top_scores_player(player_ids=selected_player_ids) #this incude top ones too, if there are no specific names in search
          
@@ -238,6 +241,11 @@ async def news_agent_Node(state:GraphState):
       finally:
          print(f"news_agent_Node: {time.perf_counter()-start:.2f}s")
 
+def fallback_agent(state:GraphState):
+    return{
+        "final_answer":"Sorry, I couldn't process your request. Please ensure your question is football-related and that any player, team, or competition names are correct, then try again."
+    }
+
 async def final_agent_node(state:GraphState):
       # print("\nFinal Agent State:")
       # print(json.dumps(state, indent=4, default=str))
@@ -265,4 +273,8 @@ async def final_agent_node(state:GraphState):
          print(f"final_agent_node: {time.perf_counter()-start:.2f}s")
 
 def route_agents(state:GraphState):
-    return state['agents']
+   if not state["is_football_query"]:
+        state["agents"] = ['Fallback-Agent']
+        return state["agents"]
+
+   return state["agents"]
