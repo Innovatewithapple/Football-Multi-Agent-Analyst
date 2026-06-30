@@ -240,7 +240,8 @@ async def news_agent_Node(state:GraphState):
 
 async def final_agent_node(state:GraphState):
       # print("\nFinal Agent State:")
-      # print(json.dumps(state, indent=4, default=str)) 
+      # print(json.dumps(state, indent=4, default=str))
+      print("🔥 FINAL AGENT EXECUTED") 
       start = time.perf_counter()
       try:
          final_chain=(
@@ -251,9 +252,9 @@ async def final_agent_node(state:GraphState):
 
          result = await final_chain.ainvoke({
          "user_query":state['question'],
-         "matchup_response":state['matchup_agent_response'],
-         "player_response":state['player_agent_response'],
-         "news_response":state['news_agent_response']
+         "matchup_response":state.get('matchup_agent_response',""),
+         "player_response":state.get('player_agent_response',""),
+         "news_response":state.get('news_agent_response',"")
          })
 
          return {
@@ -262,3 +263,6 @@ async def final_agent_node(state:GraphState):
       
       finally:
          print(f"final_agent_node: {time.perf_counter()-start:.2f}s")
+
+def route_agents(state:GraphState):
+    return state['agents']

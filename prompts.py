@@ -228,8 +228,7 @@ final_agent_prompt = ChatPromptTemplate.from_messages([
         ### Sources
 
         - If News-Agent information is used, include a **Sources** section at the end of the response.
-        - Mention only the publication or source names (for example: BBC Sport, ESPN, Goal, Sky Sports).
-        - Do not expose raw URLs unless explicitly requested by the user.
+        - Mention the publication or source names with the respective correct urls. (for example: BBC Sport, ESPN, Goal, Sky Sports).
 
         ---
 
