@@ -9,6 +9,7 @@ from news_service import News_service
 import asyncio
 import time
 import json
+import pymupdf
 
 load_dotenv()
 
@@ -16,7 +17,7 @@ football_service = FootballService()
 news_services = News_service()
 nvidia_API = os.getenv("NVDIA_API_Key")
 base_url='https://integrate.api.nvidia.com/v1/chat/completions'
-model='meta/llama-4-maverick-17b-128e-instruct'#mistralai/mistral-medium-3.5-128b'
+model='mistralai/mistral-medium-3.5-128b'#meta/llama-4-maverick-17b-128e-instruct'
 max_Tokens = 500
 temperature = 0.0
 chat_Model = ChatNVIDIA(model=model,nvidia_api_key=nvidia_API,temperature=temperature,max_completion_tokens=max_Tokens,top_p=0.9)
@@ -25,7 +26,7 @@ parser = StrOutputParser()
 #FinalAgent:
 final_agent_max_Tokens = 700
 temperature = 0.0
-final_model = 'abacusai/dracarys-llama-3.1-70b-instruct'#'mistralai/mistral-medium-3.5-128b'
+final_model = 'mistralai/mistral-medium-3.5-128b'
 final_chat_agent_Model = ChatNVIDIA(model=final_model,nvidia_api_key=nvidia_API,temperature=temperature,max_completion_tokens=final_agent_max_Tokens,top_p=0.9)
 
 async def supervised_Node(state: GraphState):
