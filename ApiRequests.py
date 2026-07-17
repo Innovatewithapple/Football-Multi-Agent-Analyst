@@ -1,4 +1,5 @@
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_groq import ChatGroq
 from langchain_core.output_parsers import StrOutputParser
 from prompts import supervisor_Prompt,matchup_Prompt,player_agent_prompt,news_agent_prompt,final_agent_prompt
 from Modelhandlers import GraphState, SupervisorOutput, get_team_by_name,get_playerinfo_from_json_by_name,get_team_by_playername
@@ -9,25 +10,25 @@ from news_service import News_service
 import asyncio
 import time
 import json
-import pymupdf
 
 load_dotenv()
 
 football_service = FootballService()
 news_services = News_service()
 nvidia_API = os.getenv("NVDIA_API_Key")
-base_url='https://integrate.api.nvidia.com/v1/chat/completions'
-model='mistralai/mistral-medium-3.5-128b'#meta/llama-4-maverick-17b-128e-instruct'
+GROQAPI = os.getenv("GROQAPI")
+base_url='https://api.groq.com/openai/v1'
+model= 'llama-3.3-70b-versatile' # 'mistralai/mistral-medium-3.5-128b'#meta/llama-4-maverick-17b-128e-instruct'
 max_Tokens = 500
 temperature = 0.0
-chat_Model = ChatNVIDIA(model=model,nvidia_api_key=nvidia_API,temperature=temperature,max_completion_tokens=max_Tokens,top_p=0.9)
+chat_Model = ChatGroq(model=model,api_key=GROQAPI,temperature=temperature,max_completion_tokens=max_Tokens,top_p=0.9)
 parser = StrOutputParser()
 
 #FinalAgent:
 final_agent_max_Tokens = 700
 temperature = 0.0
-final_model = 'mistralai/mistral-medium-3.5-128b'
-final_chat_agent_Model = ChatNVIDIA(model=final_model,nvidia_api_key=nvidia_API,temperature=temperature,max_completion_tokens=final_agent_max_Tokens,top_p=0.9)
+final_model = 'llama-3.3-70b-versatile'
+final_chat_agent_Model = ChatGroq(model=final_model,api_key=GROQAPI,temperature=temperature,max_completion_tokens=final_agent_max_Tokens,top_p=0.9)
 
 async def supervised_Node(state: GraphState):
       start = time.perf_counter()
@@ -135,7 +136,7 @@ async def matchup_agent_Node(state: GraphState):
             'user_query':state['question'],
             'context': state['matchup_state']
             })
-         #print(f'\n\nmatchupResponse: {result}')
+         print(f'\n\nmatchupResponse: {result}')
          return {
             "matchup_agent_response":result
          }
@@ -188,7 +189,7 @@ async def player_agent_Node(state:GraphState):
             "user_query":state['question'],
             "context":state['player_state']
          })
-         #print(f'\n\nfinal_result: {result}')
+         print(f'\n\nplayer_result: {result}')
          return {
             "player_agent_response":result
          }
@@ -234,7 +235,7 @@ async def news_agent_Node(state:GraphState):
             "context":state['news_state'],
             "topics":state['topics']
          })
-
+         print(f'\n\nNewsResponse: {result}')
          return {
             "news_agent_response":result
          }
@@ -258,7 +259,7 @@ async def final_agent_node(state:GraphState):
             |chat_Model
             |parser
          )
-
+         #print(f'\n\nFINALResponse: {result}')
          result = await final_chain.ainvoke({
          "user_query":state['question'],
          "matchup_response":state.get('matchup_agent_response',""),
