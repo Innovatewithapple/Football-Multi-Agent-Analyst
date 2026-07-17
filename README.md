@@ -9,4 +9,4 @@ app_port: 7860
 
 # Football Analyser
 
-Football Multi-Agent AI Analyst built with FastAPI, LangGraph and Streamlit.
+Football Multi-Agent AI Analyst built with FastAPI, LangGraph and Streamlit.   
